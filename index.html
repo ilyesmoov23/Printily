@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المطبعة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- القائمة الجانبية -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-print"></i>
+                <span>المطبعة</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>لوحة التحكم</span>
+            </a>
+            <a href="#" class="nav-item" data-page="orders">
+                <i class="fas fa-shopping-cart"></i>
+                <span>الطلبات</span>
+            </a>
+            <a href="#" class="nav-item" data-page="inventory">
+                <i class="fas fa-boxes"></i>
+                <span>المخزون</span>
+            </a>
+            <a href="#" class="nav-item" data-page="suppliers">
+                <i class="fas fa-truck"></i>
+                <span>الموردين</span>
+            </a>
+            <a href="#" class="nav-item" data-page="clients">
+                <i class="fas fa-users"></i>
+                <span>العملاء</span>
+            </a>
+            <a href="#" class="nav-item" data-page="tasks">
+                <i class="fas fa-tasks"></i>
+                <span>المهام</span>
+            </a>
+            <a href="#" class="nav-item" data-page="notes">
+                <i class="fas fa-sticky-note"></i>
+                <span>الملاحظات</span>
+            </a>
+            <a href="#" class="nav-item" data-page="calendar">
+                <i class="fas fa-calendar-alt"></i>
+                <span>التقويم</span>
+            </a>
+            <a href="#" class="nav-item" data-page="reports">
+                <i class="fas fa-chart-bar"></i>
+                <span>التقارير</span>
+            </a>
+            <a href="#" class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>الإعدادات</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="backup-btn" onclick="exportBackup()">
+                <i class="fas fa-download"></i>
+                <span>نسخ احتياطي</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <!-- الهيدر -->
+        <header class="header">
+            <button class="toggle-sidebar" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="header-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="globalSearch" placeholder="بحث سريع...">
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showQuickAdd()">
+                    <i class="fas fa-plus"></i>
+                    <span>إضافة سريعة</span>
+                </button>
+                <div class="header-date">
+                    <i class="fas fa-calendar"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- الصفحات -->
+        <div class="page-container">
+            <!-- لوحة التحكم -->
+            <section class="page active" id="page-dashboard">
+                <div class="page-header">
+                    <h1><i class="fas fa-tachometer-alt"></i> لوحة التحكم</h1>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-orders">0</h3>
+                            <p>الطلبات النشطة</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-revenue">0 د.م</h3>
+                            <p>إيرادات اليوم</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-clients">0</h3>
+                            <p>العملاء</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-lowstock">0</h3>
+                            <p>مواد منخفضة</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-clock"></i> الطلبات الأخيرة</h2>
+                            <a href="#" data-page="orders" class="view-all">عرض الكل</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="orders-list" id="recentOrders">
+                                <!-- ستُملأ ديناميكياً -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-tasks"></i> المهام العاجلة</h2>
+                            <a href="#" data-page="tasks" class="view-all">عرض الكل</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="tasks-list" id="urgentTasks">
+                                <!-- ستُملأ ديناميكياً -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-calendar-day"></i> مواعيد التسليم القادمة</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="deliveries-list" id="upcomingDeliveries">
+                                <!-- ستُملأ ديناميكياً -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-chart-line"></i> ملخص الأسبوع</h2>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="weeklyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- صفحة الطلبات -->
+            <section class="page" id="page-orders">
+                <div class="page-header">
+                    <h1><i class="fas fa-shopping-cart"></i> إدارة الطلبات</h1>
+                    <button class="btn btn-primary" onclick="showOrderModal()">
+                        <i class="fas fa-plus"></i> طلب جديد
+                    </button>
+                </div>
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="ordersSearch" placeholder="بحث في الطلبات...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="orderStatusFilter">
+                            <option value="">كل الحالات</option>
+                            <option value="pending">قيد التنفيذ</option>
+                            <option value="ready">جاهز</option>
+                            <option value="delivered">مُسلّم</option>
+                        </select>
+                        <select id="orderServiceFilter">
+                            <option value="">كل الخدمات</option>
+                        </select>
+                        <input type="date" id="orderDateFilter">
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>رقم الطلب</th>
+                                <th>العميل</th>
+                                <th>الخدمة</th>
+                                <th>الكمية</th>
+                                <th>السعر</th>
+                                <th>تاريخ التسليم</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- ستُملأ ديناميكياً -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- صفحة المخزون -->
+            <section class="page" id="page-inventory">
+                <div class="page-header">
+                    <h1><i class="fas fa-boxes"></i> إدارة المخزون</h1>
+                    <div class="header-buttons">
+                        <button class="btn btn-secondary" onclick="showPurchaseModal()">
+                            <i class="fas fa-shopping-bag"></i> تسجيل شراء
+                        </button>
+                        <button class="btn btn-primary" onclick="showMaterialModal()">
+                            <i class="fas fa-plus"></i> إضافة مادة
+                        </button>
+                    </div>
+                </div>
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="inventorySearch" placeholder="بحث في المواد...">
+                    </div>
+                    <div class="filter-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="lowStockOnly">
+                            <span>المواد المنخفضة فقط</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="needsCheckOnly">
+                            <span>تحتاج مراجعة</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>اسم المادة</th>
+                                <th>الوحدة</th>
+                                <th>الكمية</th>
+                                <th>سعر الشراء</th>
+                                <th>الحد الأدنى</th>
+                                <th>الحالة</th>
+                                <th>مراجعة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                            <!-- ستُملأ ديناميكياً -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- صفحة الموردين -->
+            <section class="page" id="page-suppliers">
+                <div class="page-header">
+                    <h1><i class="fas fa-truck"></i> إدارة الموردين</h1>
+                    <button class="btn btn-primary" onclick="showSupplierModal()">
+                        <i class="fas fa-plus"></i> إضافة مورد
+                    </button>
+                </div>
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="suppliersSearch" placeholder="بحث في الموردين...">
+                    </div>
+                </div>
+                <div class="cards-grid" id="suppliersGrid">
+                    <!-- ستُملأ ديناميكياً -->
+                </div>
+            </section>
+
+            <!-- صفحة العملاء -->
+            <section class="page" id="page-clients">
+                <div class="page-header">
+                    <h1><i class="fas fa-users"></i> إدارة العملاء</h1>
+                    <button class="btn btn-primary" onclick="showClientModal()">
+                        <i class="fas fa-plus"></i> إضافة عميل
+                    </button>
+                </div>
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="clientsSearch" placeholder="بحث في العملاء...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="clientTypeFilter">
+                            <option value="">كل التصنيفات</option>
+                            <option value="permanent">دائم</option>
+                            <option value="new">جديد</option>
+                            <option value="company">شركة</option>
+                            <option value="individual">فرد</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="cards-grid" id="clientsGrid">
+                    <!-- ستُملأ ديناميكياً -->
+                </div>
+            </section>
+
+            <!-- صفحة المهام -->
+            <section class="page" id="page-tasks">
+                <div class="page-header">
+                    <h1><i class="fas fa-tasks"></i> إدارة المهام</h1>
+                    <button class="btn btn-primary" onclick="showTaskModal()">
+                        <i class="fas fa-plus"></i> مهمة جديدة
+                    </button>
+                </div>
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="tasksSearch" placeholder="بحث في المهام...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="taskStatusFilter">
+                            <option value="">كل الحالات</option>
+                            <option value="pending">قيد الانتظار</option>
+                            <option value="in_progress">قيد التنفيذ</option>
+                            <option value="completed">مكتملة</option>
+                        </select>
+                        <select id="taskPriorityFilter">
+                            <option value="">كل الأولويات</option>
+                            <option value="high">عالية</option>
+                            <option value="medium">متوسطة</option>
+                            <option value="low">منخفضة</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="tasks-board" id="tasksBoard">
+                    <!-- ستُملأ ديناميكياً -->
+                </div>
+            </section>
+
+            <!-- صفحة الملاحظات -->
+            <section class="page" id="page-notes">
+                <div class="page-header">
+                    <h1><i class="fas fa-sticky-note"></i> الملاحظات</h1>
+                    <button class="btn btn-primary" onclick="showNoteModal()">
+                        <i class="fas fa-plus"></i> ملاحظة جديدة
+                    </button>
+                </div>
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="notesSearch" placeholder="بحث في الملاحظات...">
+                    </div>
+                    <div class="tags-filter" id="tagsFilter">
+                        <!-- ستُملأ ديناميكياً -->
+                    </div>
+                </div>
+                <div class="notes-grid" id="notesGrid">
+                    <!-- ستُملأ ديناميكياً -->
+                </div>
+            </section>
+
+            <!-- صفحة التقويم -->
+            <section class="page" id="page-calendar">
+                <div class="page-header">
+                    <h1><i class="fas fa-calendar-alt"></i> التقويم</h1>
+                    <div class="calendar-nav">
+                        <button class="btn btn-icon" onclick="changeMonth(-1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <span id="currentMonth"></span>
+                        <button class="btn btn-icon" onclick="changeMonth(1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="btn btn-secondary" onclick="goToToday()">اليوم</button>
+                    </div>
+                </div>
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div>الأحد</div>
+                        <div>الإثنين</div>
+                        <div>الثلاثاء</div>
+                        <div>الأربعاء</div>
+                        <div>الخميس</div>
+                        <div>الجمعة</div>
+                        <div>السبت</div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- ستُملأ ديناميكياً -->
+                    </div>
+                </div>
+                <div class="calendar-legend">
+                    <span class="legend-item"><span class="dot delivery"></span> موعد تسليم</span>
+                    <span class="legend-item"><span class="dot task"></span> مهمة</span>
+                    <span class="legend-item"><span class="dot order"></span> طلب جديد</span>
+                </div>
+            </section>
+
+            <!-- صفحة التقارير -->
+            <section class="page" id="page-reports">
+                <div class="page-header">
+                    <h1><i class="fas fa-chart-bar"></i> التقارير المالية</h1>
+                    <div class="header-buttons">
+                        <button class="btn btn-secondary" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel"></i> تصدير Excel
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf"></i> تصدير PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <select id="reportPeriod">
+                            <option value="daily">يومي</option>
+                            <option value="weekly">أسبوعي</option>
+                            <option value="monthly" selected>شهري</option>
+                            <option value="yearly">سنوي</option>
+                            <option value="custom">مخصص</option>
+                        </select>
+                        <input type="date" id="reportStartDate">
+                        <input type="date" id="reportEndDate">
+                        <button class="btn btn-primary" onclick="generateReport()">
+                            <i class="fas fa-sync"></i> تحديث
+                        </button>
+                    </div>
+                </div>
+                <div class="reports-grid">
+                    <div class="report-card revenue">
+                        <div class="report-icon">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="report-info">
+                            <h3>الإيرادات</h3>
+                            <p id="totalRevenue">0 د.م</p>
+                        </div>
+                    </div>
+                    <div class="report-card expenses">
+                        <div class="report-icon">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div class="report-info">
+                            <h3>المصروفات</h3>
+                            <p id="totalExpenses">0 د.م</p>
+                        </div>
+                    </div>
+                    <div class="report-card profit">
+                        <div class="report-icon">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <div class="report-info">
+                            <h3>صافي الربح</h3>
+                            <p id="netProfit">0 د.م</p>
+                        </div>
+                    </div>
+                    <div class="report-card orders-count">
+                        <div class="report-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="report-info">
+                            <h3>عدد الطلبات</h3>
+                            <p id="ordersCount">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>الإيرادات والمصروفات</h2>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="revenueExpensesChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>توزيع الخدمات</h2>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="servicesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2>تفاصيل المصروفات</h2>
+                        <button class="btn btn-primary btn-sm" onclick="showExpenseModal()">
+                            <i class="fas fa-plus"></i> إضافة مصروف
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>الوصف</th>
+                                    <th>الفئة</th>
+                                    <th>المبلغ</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expensesTableBody">
+                                <!-- ستُملأ ديناميكياً -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- صفحة الإعدادات -->
+            <section class="page" id="page-settings">
+                <div class="page-header">
+                    <h1><i class="fas fa-cog"></i> الإعدادات</h1>
+                </div>
+                <div class="settings-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-building"></i> معلومات المطبعة</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>اسم المطبعة</label>
+                                <input type="text" id="printShopName" placeholder="أدخل اسم المطبعة">
+                            </div>
+                            <div class="form-group">
+                                <label>العنوان</label>
+                                <input type="text" id="printShopAddress" placeholder="أدخل العنوان">
+                            </div>
+                            <div class="form-group">
+                                <label>الهاتف</label>
+                                <input type="text" id="printShopPhone" placeholder="أدخل رقم الهاتف">
+                            </div>
+                            <div class="form-group">
+                                <label>البريد الإلكتروني</label>
+                                <input type="email" id="printShopEmail" placeholder="أدخل البريد الإلكتروني">
+                            </div>
+                            <button class="btn btn-primary" onclick="saveSettings()">
+                                <i class="fas fa-save"></i> حفظ الإعدادات
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-list"></i> أنواع الخدمات</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="services-list" id="servicesList">
+                                <!-- ستُملأ ديناميكياً -->
+                            </div>
+                            <div class="add-service-form">
+                                <input type="text" id="newServiceName" placeholder="اسم الخدمة الجديدة">
+                                <button class="btn btn-primary btn-sm" onclick="addService()">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-database"></i> النسخ الاحتياطي</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="backup-actions">
+                                <button class="btn btn-primary" onclick="exportBackup()">
+                                    <i class="fas fa-download"></i> تصدير نسخة احتياطية
+                                </button>
+                                <div class="file-upload">
+                                    <input type="file" id="backupFile" accept=".json" onchange="importBackup(event)">
+                                    <label for="backupFile" class="btn btn-secondary">
+                                        <i class="fas fa-upload"></i> استيراد نسخة احتياطية
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="backup-info">
+                                <p><i class="fas fa-info-circle"></i> يمكنك نقل جميع البيانات بسهولة عبر ملف النسخ الاحتياطي</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-tags"></i> فئات الملاحظات</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="tags-list" id="notesTagsList">
+                                <!-- ستُملأ ديناميكياً -->
+                            </div>
+                            <div class="add-tag-form">
+                                <input type="text" id="newTagName" placeholder="فئة جديدة">
+                                <input type="color" id="newTagColor" value="#3498db">
+                                <button class="btn btn-primary btn-sm" onclick="addTag()">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal الطلب -->
+    <div class="modal" id="orderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="orderModalTitle">طلب جديد</h2>
+                <button class="close-btn" onclick="closeModal('orderModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="orderForm">
+                    <input type="hidden" id="orderId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>العميل</label>
+                            <select id="orderClient" required>
+                                <option value="">اختر العميل</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>نوع الخدمة</label>
+                            <select id="orderService" required>
+                                <option value="">اختر الخدمة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الكمية</label>
+                            <input type="number" id="orderQuantity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>السعر</label>
+                            <input type="number" id="orderPrice" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>تاريخ الطلب</label>
+                            <input type="date" id="orderDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>تاريخ التسليم</label>
+                            <input type="date" id="orderDeliveryDate" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>الحالة</label>
+                        <select id="orderStatus">
+                            <option value="pending">قيد التنفيذ</option>
+                            <option value="ready">جاهز</option>
+                            <option value="delivered">مُسلّم</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>الملاحظات</label>
+                        <textarea id="orderNotes" rows="3" placeholder="أضف ملاحظات..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('orderModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveOrder()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal العميل -->
+    <div class="modal" id="clientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="clientModalTitle">عميل جديد</h2>
+                <button class="close-btn" onclick="closeModal('clientModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="clientForm">
+                    <input type="hidden" id="clientId">
+                    <div class="form-group">
+                        <label>الاسم</label>
+                        <input type="text" id="clientName" placeholder="اسم العميل">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الهاتف</label>
+                            <input type="tel" id="clientPhone" placeholder="رقم الهاتف">
+                        </div>
+                        <div class="form-group">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" id="clientEmail" placeholder="البريد الإلكتروني">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>العنوان</label>
+                        <input type="text" id="clientAddress" placeholder="العنوان">
+                    </div>
+                    <div class="form-group">
+                        <label>التصنيف</label>
+                        <select id="clientType">
+                            <option value="">غير محدد</option>
+                            <option value="permanent">دائم</option>
+                            <option value="new">جديد</option>
+                            <option value="company">شركة</option>
+                            <option value="individual">فرد</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="clientNotes" rows="2" placeholder="ملاحظات..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('clientModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveClient()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal المادة -->
+    <div class="modal" id="materialModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="materialModalTitle">إضافة مادة</h2>
+                <button class="close-btn" onclick="closeModal('materialModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="materialForm">
+                    <input type="hidden" id="materialId">
+                    <div class="form-group">
+                        <label>اسم المادة</label>
+                        <input type="text" id="materialName" required placeholder="اسم المادة">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الوحدة</label>
+                            <select id="materialUnit">
+                                <option value="piece">قطعة</option>
+                                <option value="kg">كيلوغرام</option>
+                                <option value="meter">متر</option>
+                                <option value="liter">لتر</option>
+                                <option value="box">علبة</option>
+                                <option value="roll">لفة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الكمية الحالية</label>
+                            <input type="number" id="materialQuantity" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>سعر الشراء</label>
+                            <input type="number" id="materialPrice" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>الحد الأدنى</label>
+                            <input type="number" id="materialMinStock" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="materialNeedsCheck">
+                            <span>تحتاج مراجعة يدوية</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="materialNotes" rows="2" placeholder="ملاحظات..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('materialModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveMaterial()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal الشراء -->
+    <div class="modal" id="purchaseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>تسجيل عملية شراء</h2>
+                <button class="close-btn" onclick="closeModal('purchaseModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="purchaseForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>المادة</label>
+                            <select id="purchaseMaterial" required>
+                                <option value="">اختر المادة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>المورد</label>
+                            <select id="purchaseSupplier">
+                                <option value="">اختر المورد</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الكمية</label>
+                            <input type="number" id="purchaseQuantity" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>سعر الوحدة</label>
+                            <input type="number" id="purchaseUnitPrice" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الإجمالي</label>
+                            <input type="number" id="purchaseTotal" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>التاريخ</label>
+                            <input type="date" id="purchaseDate" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="purchaseNotes" rows="2" placeholder="ملاحظات..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('purchaseModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="savePurchase()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal المورد -->
+    <div class="modal" id="supplierModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="supplierModalTitle">إضافة مورد</h2>
+                <button class="close-btn" onclick="closeModal('supplierModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="supplierForm">
+                    <input type="hidden" id="supplierId">
+                    <div class="form-group">
+                        <label>اسم المورد</label>
+                        <input type="text" id="supplierName" placeholder="اسم المورد">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الهاتف</label>
+                            <input type="tel" id="supplierPhone" placeholder="رقم الهاتف">
+                        </div>
+                        <div class="form-group">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" id="supplierEmail" placeholder="البريد الإلكتروني">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>العنوان</label>
+                        <input type="text" id="supplierAddress" placeholder="العنوان">
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="supplierNotes" rows="2" placeholder="ملاحظات..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('supplierModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveSupplier()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal المهمة -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="taskModalTitle">مهمة جديدة</h2>
+                <button class="close-btn" onclick="closeModal('taskModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="taskForm">
+                    <input type="hidden" id="taskId">
+                    <div class="form-group">
+                        <label>العنوان</label>
+                        <input type="text" id="taskTitle" required placeholder="عنوان المهمة">
+                    </div>
+                    <div class="form-group">
+                        <label>الوصف</label>
+                        <textarea id="taskDescription" rows="3" placeholder="وصف المهمة..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الحالة</label>
+                            <select id="taskStatus">
+                                <option value="pending">قيد الانتظار</option>
+                                <option value="in_progress">قيد التنفيذ</option>
+                                <option value="completed">مكتملة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الأولوية</label>
+                            <select id="taskPriority">
+                                <option value="low">منخفضة</option>
+                                <option value="medium">متوسطة</option>
+                                <option value="high">عالية</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>تاريخ الاستحقاق</label>
+                            <input type="date" id="taskDueDate">
+                        </div>
+                        <div class="form-group">
+                            <label>ربط بطلبية</label>
+                            <select id="taskOrderId">
+                                <option value="">بدون ربط</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="taskNotes" rows="2" placeholder="ملاحظات إضافية..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('taskModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveTask()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal الملاحظة -->
+    <div class="modal" id="noteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="noteModalTitle">ملاحظة جديدة</h2>
+                <button class="close-btn" onclick="closeModal('noteModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="noteForm">
+                    <input type="hidden" id="noteId">
+                    <div class="form-group">
+                        <label>العنوان</label>
+                        <input type="text" id="noteTitle" placeholder="عنوان الملاحظة">
+                    </div>
+                    <div class="form-group">
+                        <label>المحتوى</label>
+                        <textarea id="noteContent" rows="5" placeholder="محتوى الملاحظة..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الفئة</label>
+                            <select id="noteTag">
+                                <option value="">بدون فئة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>ربط بـ</label>
+                            <select id="noteLinkType">
+                                <option value="">بدون ربط</option>
+                                <option value="order">طلبية</option>
+                                <option value="client">عميل</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="noteLinkSelectGroup" style="display: none;">
+                        <label>اختر</label>
+                        <select id="noteLinkId">
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('noteModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveNote()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal المصروف -->
+    <div class="modal" id="expenseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>إضافة مصروف</h2>
+                <button class="close-btn" onclick="closeModal('expenseModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="expenseForm">
+                    <input type="hidden" id="expenseId">
+                    <div class="form-group">
+                        <label>الوصف</label>
+                        <input type="text" id="expenseDescription" required placeholder="وصف المصروف">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الفئة</label>
+                            <select id="expenseCategory">
+                                <option value="general">عام</option>
+                                <option value="rent">إيجار</option>
+                                <option value="utilities">فواتير</option>
+                                <option value="salaries">رواتب</option>
+                                <option value="maintenance">صيانة</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>المبلغ</label>
+                            <input type="number" id="expenseAmount" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>التاريخ</label>
+                        <input type="date" id="expenseDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="expenseNotes" rows="2" placeholder="ملاحظات..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('expenseModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveExpense()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal تفاصيل اليوم -->
+    <div class="modal" id="dayDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="dayDetailsTitle">تفاصيل اليوم</h2>
+                <button class="close-btn" onclick="closeModal('dayDetailsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="dayDetailsContent">
+                    <!-- ستُملأ ديناميكياً -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal الإضافة السريعة -->
+    <div class="modal" id="quickAddModal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h2>إضافة سريعة</h2>
+                <button class="close-btn" onclick="closeModal('quickAddModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="quick-add-options">
+                    <button class="quick-add-btn" onclick="closeModal('quickAddModal'); showOrderModal();">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>طلب جديد</span>
+                    </button>
+                    <button class="quick-add-btn" onclick="closeModal('quickAddModal'); showClientModal();">
+                        <i class="fas fa-user-plus"></i>
+                        <span>عميل جديد</span>
+                    </button>
+                    <button class="quick-add-btn" onclick="closeModal('quickAddModal'); showTaskModal();">
+                        <i class="fas fa-tasks"></i>
+                        <span>مهمة جديدة</span>
+                    </button>
+                    <button class="quick-add-btn" onclick="closeModal('quickAddModal'); showNoteModal();">
+                        <i class="fas fa-sticky-note"></i>
+                        <span>ملاحظة جديدة</span>
+                    </button>
+                    <button class="quick-add-btn" onclick="closeModal('quickAddModal'); showExpenseModal();">
+                        <i class="fas fa-money-bill"></i>
+                        <span>مصروف جديد</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal عرض سجل العميل -->
+    <div class="modal" id="clientHistoryModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2 id="clientHistoryTitle">سجل العميل</h2>
+                <button class="close-btn" onclick="closeModal('clientHistoryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="clientHistoryContent">
+                    <!-- ستُملأ ديناميكياً -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal عرض سجل المورد -->
+    <div class="modal" id="supplierHistoryModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2 id="supplierHistoryTitle">سجل المورد</h2>
+                <button class="close-btn" onclick="closeModal('supplierHistoryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="supplierHistoryContent">
+                    <!-- ستُملأ ديناميكياً -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal طباعة الفاتورة -->
+    <div class="modal" id="invoiceModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>الفاتورة</h2>
+                <button class="close-btn" onclick="closeModal('invoiceModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="invoiceContent">
+                    <!-- ستُملأ ديناميكياً -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('invoiceModal')">إغلاق</button>
+                <button class="btn btn-primary" onclick="printInvoice()">
+                    <i class="fas fa-print"></i> طباعة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast للإشعارات -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/clients.js"></script>
+    <script src="js/suppliers.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/notes.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/reports.js"></script>
+    <script src="js/backup.js"></script>
+    <script src="js/print.js"></script>
+</body>
+</html>
