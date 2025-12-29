@@ -1,0 +1,2676 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المطبعة</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+/* ===== Variables ===== */
+:root {
+    --primary-dark: #1a365d;
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --sky-blue: #0ea5e9;
+    --sky-light: #7dd3fc;
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+    --success: #10b981;
+    --success-light: #d1fae5;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --danger: #ef4444;
+    --danger-light: #fee2e2;
+    --info: #06b6d4;
+    --info-light: #cffafe;
+    --purple: #8b5cf6;
+    --purple-light: #ede9fe;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --radius-sm: 0.375rem;
+    --radius: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-full: 9999px;
+    --sidebar-width: 260px;
+    --header-height: 70px;
+}
+
+/* ===== Reset & Base ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { direction: rtl; }
+body {
+    font-family: 'Tajawal', sans-serif;
+    background-color: var(--gray-100);
+    color: var(--gray-800);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: inherit; }
+input, select, textarea {
+    font-family: inherit;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    user-select: text !important;
+}
+
+/* ===== Layout ===== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%);
+    color: var(--white);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+}
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+.logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: white;
+}
+.logo i { font-size: 1.75rem; }
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+    overflow-y: auto;
+}
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.2s ease;
+    border-right: 3px solid transparent;
+    font-size: 0.9rem;
+}
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+}
+.nav-item.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--white);
+    border-right-color: var(--sky-light);
+}
+.nav-item i { width: 20px; text-align: center; }
+.sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.main-content {
+    margin-right: var(--sidebar-width);
+    min-height: 100vh;
+}
+.header {
+    position: sticky;
+    top: 0;
+    height: var(--header-height);
+    background-color: var(--white);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    gap: 1rem;
+    z-index: 100;
+}
+.toggle-sidebar {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--gray-600);
+}
+.header-search {
+    flex: 1;
+    max-width: 400px;
+    position: relative;
+}
+.header-search i {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+}
+.header-search input {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    padding-right: 2.5rem;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-full);
+    background-color: var(--gray-50);
+    font-size: 0.875rem;
+}
+.header-search input:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    background-color: var(--white);
+}
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-right: auto;
+}
+.header-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gray-500);
+    font-size: 0.875rem;
+}
+
+/* ===== Buttons ===== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.btn-primary { background-color: var(--primary); color: var(--white); }
+.btn-primary:hover { background-color: var(--primary-dark); }
+.btn-secondary { background-color: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-200); }
+.btn-secondary:hover { background-color: var(--gray-200); }
+.btn-danger { background-color: var(--danger); color: var(--white); }
+.btn-danger:hover { background-color: #dc2626; }
+.btn-success { background-color: var(--success); color: var(--white); }
+.btn-success:hover { background-color: #059669; }
+.btn-warning { background-color: var(--warning); color: var(--white); }
+.btn-warning:hover { background-color: #d97706; }
+.btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    background-color: var(--gray-100);
+    color: var(--gray-600);
+    border: none;
+}
+.btn-icon:hover { background-color: var(--gray-200); }
+.backup-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius);
+    color: var(--white);
+    font-size: 0.875rem;
+}
+.backup-btn:hover { background-color: rgba(255, 255, 255, 0.2); }
+
+/* ===== Page Container ===== */
+.page-container { padding: 1.5rem; }
+.page { display: none; }
+.page.active { display: block; }
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.page-header h1 i { color: var(--primary); }
+.header-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ===== Stats Grid ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.stat-card {
+    background-color: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow);
+}
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+.stat-icon.blue { background-color: rgba(37, 99, 235, 0.1); color: var(--primary); }
+.stat-icon.green { background-color: var(--success-light); color: var(--success); }
+.stat-icon.orange { background-color: var(--warning-light); color: var(--warning); }
+.stat-icon.red { background-color: var(--danger-light); color: var(--danger); }
+.stat-icon.purple { background-color: var(--purple-light); color: var(--purple); }
+.stat-icon.cyan { background-color: var(--info-light); color: var(--info); }
+.stat-info h3 { font-size: 1.5rem; font-weight: 700; color: var(--gray-800); }
+.stat-info p { font-size: 0.875rem; color: var(--gray-500); }
+
+/* ===== Cards ===== */
+.card {
+    background-color: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.card-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.card-header h2 i { color: var(--primary); }
+.view-all { font-size: 0.8125rem; color: var(--primary); font-weight: 500; }
+.view-all:hover { text-decoration: underline; }
+.card-body { padding: 1.25rem; }
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+/* ===== Tables ===== */
+.table-container { overflow-x: auto; }
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.data-table th, .data-table td {
+    padding: 0.875rem 1rem;
+    text-align: right;
+}
+.data-table th {
+    background-color: var(--gray-50);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: var(--gray-600);
+    border-bottom: 1px solid var(--gray-200);
+}
+.data-table td {
+    font-size: 0.875rem;
+    color: var(--gray-700);
+    border-bottom: 1px solid var(--gray-100);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background-color: var(--gray-50); }
+
+/* ===== Status Badges ===== */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.status-badge.pending { background-color: var(--warning-light); color: #b45309; }
+.status-badge.ready, .status-badge.in_progress { background-color: var(--info-light); color: #0e7490; }
+.status-badge.delivered, .status-badge.completed { background-color: var(--success-light); color: #047857; }
+.status-badge.high { background-color: var(--danger-light); color: #b91c1c; }
+.status-badge.medium { background-color: var(--warning-light); color: #b45309; }
+.status-badge.low { background-color: var(--gray-100); color: var(--gray-600); }
+
+/* ===== Action Buttons ===== */
+.action-btns { display: flex; gap: 0.25rem; }
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius);
+    background-color: var(--gray-100);
+    color: var(--gray-600);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+.action-btn:hover { background-color: var(--gray-200); }
+.action-btn.edit:hover { background-color: rgba(37, 99, 235, 0.1); color: var(--primary); }
+.action-btn.delete:hover { background-color: var(--danger-light); color: var(--danger); }
+.action-btn.view:hover { background-color: var(--info-light); color: var(--info); }
+.action-btn.print:hover { background-color: var(--success-light); color: var(--success); }
+
+/* ===== Filters ===== */
+.filters-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+}
+.search-box i {
+    position: absolute;
+    right: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+}
+.search-box input {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    padding-right: 2.5rem;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+}
+.search-box input:focus { outline: none; border-color: var(--primary-light); }
+.filter-group { display: flex; align-items: center; gap: 0.5rem; }
+.filter-group select, .filter-group input[type="date"] {
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    background-color: var(--white);
+}
+
+/* ===== Forms ===== */
+.form-group { margin-bottom: 1rem; }
+.form-group label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+}
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+
+/* ===== Modal ===== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 1rem;
+}
+.modal.active { display: flex; }
+.modal-content {
+    background-color: var(--white);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+}
+.modal-content.modal-lg { max-width: 900px; }
+.modal-content.modal-sm { max-width: 400px; }
+.modal-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.modal-header h2 { font-size: 1.125rem; font-weight: 600; color: var(--gray-800); }
+.close-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius);
+    background-color: var(--gray-100);
+    color: var(--gray-600);
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+.close-btn:hover { background-color: var(--gray-200); }
+.modal-body { padding: 1.25rem; overflow-y: auto; flex: 1; }
+.modal-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--gray-100);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+/* ===== Empty State ===== */
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--gray-400); }
+.empty-state i { font-size: 3rem; margin-bottom: 1rem; }
+.empty-state p { font-size: 0.9375rem; }
+
+/* ===== Toast ===== */
+.toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background-color: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    min-width: 300px;
+    animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.toast.success { border-right: 4px solid var(--success); }
+.toast.error { border-right: 4px solid var(--danger); }
+.toast.warning { border-right: 4px solid var(--warning); }
+.toast.info { border-right: 4px solid var(--info); }
+.toast i { font-size: 1.25rem; }
+.toast.success i { color: var(--success); }
+.toast.error i { color: var(--danger); }
+.toast.warning i { color: var(--warning); }
+.toast.info i { color: var(--info); }
+
+/* ===== Order Item Styles ===== */
+.form-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: var(--gray-50);
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+}
+.form-section h3 {
+    font-size: 1rem;
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.order-item-row {
+    background-color: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+}
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed var(--gray-200);
+}
+.item-number {
+    font-weight: 600;
+    color: var(--primary);
+    background-color: rgba(37, 99, 235, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+}
+.order-summary {
+    background-color: var(--primary-dark);
+    color: var(--white);
+    padding: 1rem;
+    border-radius: var(--radius);
+}
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.9375rem;
+}
+.summary-row.total {
+    font-size: 1.125rem;
+    font-weight: 700;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+}
+.readonly-field { background-color: var(--gray-100) !important; cursor: not-allowed; }
+.profit-positive { color: var(--success); font-weight: 600; }
+.profit-negative { color: var(--danger); font-weight: 600; }
+.text-danger { color: var(--danger); }
+.text-muted { color: var(--gray-400); font-size: 0.75rem; }
+.required { color: var(--danger); }
+
+/* Additional Costs Section */
+.additional-costs {
+    background-color: var(--warning-light);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-top: 1rem;
+}
+.additional-costs h4 { color: #b45309; margin-bottom: 0.75rem; font-size: 0.9375rem; }
+.cost-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.cost-item label { flex: 1; }
+.cost-item input[type="number"] { width: 150px; }
+
+/* Material Source Options */
+.material-source { display: flex; gap: 1rem; margin: 0.5rem 0; }
+.material-source label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.material-source label:hover { border-color: var(--primary-light); }
+.material-source label:has(input:checked) {
+    border-color: var(--primary);
+    background-color: rgba(37, 99, 235, 0.05);
+}
+
+/* Print Options */
+.print-options {
+    background-color: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-top: 1rem;
+}
+.print-options h4 { margin-bottom: 0.75rem; font-size: 0.9375rem; color: var(--gray-700); }
+.print-option { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    cursor: pointer;
+}
+
+/* ===== Image Upload ===== */
+.image-upload {
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.image-upload:hover { border-color: var(--primary); background-color: rgba(37, 99, 235, 0.02); }
+.image-upload input[type="file"] { display: none; }
+.image-upload i { font-size: 2rem; color: var(--gray-400); margin-bottom: 0.5rem; }
+.image-upload p { color: var(--gray-500); font-size: 0.875rem; }
+.image-preview { max-width: 150px; max-height: 150px; border-radius: var(--radius); object-fit: cover; margin: 0 auto; }
+.avatar-upload {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px dashed var(--gray-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.2s;
+    margin: 0 auto 1rem;
+}
+.avatar-upload:hover { border-color: var(--primary); }
+.avatar-upload img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-upload i { font-size: 2rem; color: var(--gray-400); }
+
+/* ===== Products/Categories Grid ===== */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+.category-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+.category-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+.category-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    background-color: var(--gray-100);
+}
+.category-info { padding: 1rem; }
+.category-info h3 { font-size: 1rem; font-weight: 600; color: var(--gray-800); margin-bottom: 0.25rem; }
+.category-info p { font-size: 0.8125rem; color: var(--gray-500); }
+.category-actions {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.category-card:hover .category-actions { opacity: 1; }
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+.product-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+.product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.product-image { width: 100%; height: 140px; object-fit: cover; background-color: var(--gray-100); }
+.product-info { padding: 0.875rem; }
+.product-info h4 { font-size: 0.9375rem; font-weight: 600; color: var(--gray-800); margin-bottom: 0.25rem; }
+.product-price { font-size: 1rem; font-weight: 700; color: var(--primary); }
+.product-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.875rem;
+    border-top: 1px solid var(--gray-100);
+}
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gray-600);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+}
+.back-btn:hover { color: var(--primary); }
+
+/* Client/Supplier Avatar */
+.avatar-cell { display: flex; align-items: center; gap: 0.75rem; }
+.avatar-small {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: var(--gray-200);
+}
+.avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-500);
+    font-size: 0.875rem;
+}
+
+/* ===== Calendar Styles ===== */
+.calendar-container {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: var(--primary);
+    color: white;
+}
+.calendar-header h3 { font-size: 1.125rem; }
+.calendar-nav { display: flex; gap: 0.5rem; }
+.calendar-nav button {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius);
+    cursor: pointer;
+}
+.calendar-nav button:hover { background: rgba(255,255,255,0.3); }
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+}
+.calendar-weekdays span {
+    padding: 0.75rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: var(--gray-600);
+}
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+.calendar-day {
+    min-height: 80px;
+    padding: 0.5rem;
+    border: 1px solid var(--gray-100);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.calendar-day:hover { background: var(--gray-50); }
+.calendar-day.other-month { background: var(--gray-50); color: var(--gray-400); }
+.calendar-day.today { background: rgba(37, 99, 235, 0.1); }
+.calendar-day .day-number {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+.calendar-day.today .day-number {
+    background: var(--primary);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.calendar-event {
+    font-size: 0.7rem;
+    padding: 0.125rem 0.25rem;
+    border-radius: 2px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.calendar-event.order { background: var(--info-light); color: var(--info); }
+.calendar-event.task { background: var(--warning-light); color: #b45309; }
+.calendar-event.delivery { background: var(--success-light); color: var(--success); }
+
+/* ===== Notes Grid ===== */
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+.note-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: all 0.2s;
+}
+.note-card:hover { box-shadow: var(--shadow-md); }
+.note-card-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.note-card-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+.note-card-body { padding: 1rem; }
+.note-card-body p {
+    color: var(--gray-600);
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+.note-card-footer {
+    padding: 0.75rem 1rem;
+    background: var(--gray-50);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+.note-tag {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    background: var(--primary-light);
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    margin-left: 0.25rem;
+}
+
+/* ===== Charts Grid ===== */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+.chart-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+}
+.chart-card h3 {
+    font-size: 1rem;
+    color: var(--gray-700);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+.report-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.detail-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+.detail-card h4 {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+    margin-bottom: 0.5rem;
+}
+.detail-card .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+.detail-card .value.positive { color: var(--success); }
+.detail-card .value.negative { color: var(--danger); }
+
+/* ===== Shopping Cart ===== */
+.cart-fab {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.cart-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+}
+.cart-fab .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--danger);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+.cart-sidebar {
+    position: fixed;
+    top: 0;
+    left: -400px;
+    width: 380px;
+    height: 100vh;
+    background: var(--white);
+    box-shadow: var(--shadow-lg);
+    z-index: 1001;
+    transition: left 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+.cart-sidebar.active { left: 0; }
+.cart-header {
+    padding: 1.5rem;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.cart-header h3 { font-size: 1.125rem; }
+.cart-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+.cart-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+}
+.cart-item-img {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius);
+    object-fit: cover;
+}
+.cart-item-info { flex: 1; }
+.cart-item-info h4 { font-size: 0.9375rem; margin-bottom: 0.25rem; }
+.cart-item-info p { font-size: 0.8125rem; color: var(--gray-500); }
+.cart-item-price { font-weight: 600; color: var(--primary); }
+.cart-item-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.cart-item-qty {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.cart-item-qty button {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    background: white;
+    cursor: pointer;
+}
+.cart-item-qty span { font-weight: 600; min-width: 24px; text-align: center; }
+.cart-item-remove {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+.cart-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--gray-200);
+    background: var(--gray-50);
+}
+.cart-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+.cart-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+.cart-actions button { flex: 1; }
+.cart-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    display: none;
+}
+.cart-overlay.active { display: block; }
+
+/* ===== Product Modal ===== */
+.product-view-modal .modal-content {
+    max-width: 500px;
+}
+.product-view-img {
+    width: 100%;
+    height: 250px;
+    object-fit: contain;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+}
+.product-view-info h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+.product-view-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+.product-units-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.unit-option {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+.unit-option:hover { border-color: var(--primary-light); }
+.unit-option.selected {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.1);
+}
+.unit-option .unit-name { font-weight: 500; }
+.unit-option .unit-price { font-size: 0.8125rem; color: var(--gray-500); }
+
+/* ===== Sub-services ===== */
+.subservices-container {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+}
+.subservices-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.subservice-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-full);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.subservice-chip:hover { border-color: var(--primary-light); }
+.subservice-chip.selected {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+.subservice-price-input {
+    width: 80px;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    margin-right: 0.5rem;
+}
+.service-with-subs {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: white;
+}
+.service-with-subs .service-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.add-subservice-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+.add-subservice-row input { flex: 1; }
+
+/* ===== Tasks Board ===== */
+.tasks-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+.task-column {
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+}
+.task-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--gray-200);
+}
+.task-column-header h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.task-column-header .count {
+    background: var(--gray-200);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+}
+.task-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: var(--shadow-sm);
+    border-right: 3px solid var(--gray-300);
+}
+.task-card.high { border-right-color: var(--danger); }
+.task-card.medium { border-right-color: var(--warning); }
+.task-card.low { border-right-color: var(--success); }
+.task-card h4 { font-size: 0.9375rem; margin-bottom: 0.5rem; color: var(--gray-800); }
+.task-card p { font-size: 0.8125rem; color: var(--gray-500); margin-bottom: 0.5rem; }
+.task-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--gray-100);
+}
+.task-due {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.task-due.overdue { color: var(--danger); }
+
+/* ===== Settings Tabs ===== */
+.settings-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: 0.5rem;
+}
+.settings-tab {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    background: none;
+    color: var(--gray-500);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: var(--radius) var(--radius) 0 0;
+    transition: all 0.2s;
+}
+.settings-tab:hover { color: var(--gray-700); background: var(--gray-50); }
+.settings-tab.active {
+    color: var(--primary);
+    background: var(--white);
+    box-shadow: 0 -2px 0 var(--primary) inset;
+}
+.settings-panel { display: none; }
+.settings-panel.active { display: block; }
+
+/* Services/Units List */
+.items-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+.item-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background: var(--gray-100);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+}
+.item-tag button {
+    background: none;
+    border: none;
+    color: var(--gray-500);
+    cursor: pointer;
+    padding: 0;
+    font-size: 1rem;
+    line-height: 1;
+}
+.item-tag button:hover { color: var(--danger); }
+.add-item-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+.add-item-row input { flex: 1; }
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+    .sidebar { transform: translateX(100%); }
+    .sidebar.active { transform: translateX(0); }
+    .main-content { margin-right: 0; }
+    .toggle-sidebar { display: block; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .tasks-board { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+    .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    .page-header { flex-direction: column; align-items: flex-start; }
+    .filters-bar { flex-direction: column; align-items: stretch; }
+    .search-box { max-width: 100%; }
+    .categories-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .calendar-day { min-height: 60px; }
+}
+
+/* Print Styles */
+@media print {
+    body * { visibility: hidden; }
+    #invoiceContent, #invoiceContent * { visibility: visible; }
+    #invoiceContent { position: absolute; right: 0; top: 0; width: 100%; }
+}
+    </style>
+</head>
+<body>
+    <div id="printShopApp">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo" id="shopLogo">
+                    <img src="" alt="" class="logo-img" id="logoImg" style="display: none;">
+                    <i class="fas fa-print" id="logoIcon"></i>
+                    <span id="shopNameDisplay">المطبعة</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>لوحة التحكم</span>
+                </a>
+                <a href="#" class="nav-item" data-page="orders">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>الطلبات</span>
+                </a>
+                <a href="#" class="nav-item" data-page="products">
+                    <i class="fas fa-store"></i>
+                    <span>البضاعة</span>
+                </a>
+                <a href="#" class="nav-item" data-page="inventory">
+                    <i class="fas fa-boxes"></i>
+                    <span>المخزون</span>
+                </a>
+                <a href="#" class="nav-item" data-page="suppliers">
+                    <i class="fas fa-truck"></i>
+                    <span>الموردين</span>
+                </a>
+                <a href="#" class="nav-item" data-page="clients">
+                    <i class="fas fa-users"></i>
+                    <span>العملاء</span>
+                </a>
+                <a href="#" class="nav-item" data-page="tasks">
+                    <i class="fas fa-tasks"></i>
+                    <span>المهام</span>
+                </a>
+                <a href="#" class="nav-item" data-page="notes">
+                    <i class="fas fa-sticky-note"></i>
+                    <span>الملاحظات</span>
+                </a>
+                <a href="#" class="nav-item" data-page="calendar">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>التقويم</span>
+                </a>
+                <a href="#" class="nav-item" data-page="reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>التقارير</span>
+                </a>
+                <a href="#" class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="backup-btn" onclick="exportBackup()">
+                    <i class="fas fa-download"></i>
+                    <span>نسخ احتياطي</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <button class="toggle-sidebar" id="toggleSidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="globalSearch" placeholder="بحث سريع...">
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showOrderModal()">
+                        <i class="fas fa-plus"></i>
+                        <span>طلب جديد</span>
+                    </button>
+                    <div class="header-date">
+                        <i class="fas fa-calendar"></i>
+                        <span id="currentDate"></span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-container">
+                <!-- Dashboard Page -->
+                <section class="page active" id="page-dashboard">
+                    <div class="page-header">
+                        <h1><i class="fas fa-tachometer-alt"></i> لوحة التحكم</h1>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fas fa-shopping-cart"></i></div>
+                            <div class="stat-info">
+                                <h3 id="stat-orders">0</h3>
+                                <p>الطلبات النشطة</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fas fa-money-bill-wave"></i></div>
+                            <div class="stat-info">
+                                <h3 id="stat-revenue">0 د.ج</h3>
+                                <p>إيرادات اليوم</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange"><i class="fas fa-users"></i></div>
+                            <div class="stat-info">
+                                <h3 id="stat-clients">0</h3>
+                                <p>العملاء</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="stat-info">
+                                <h3 id="stat-lowstock">0</h3>
+                                <p>مواد منخفضة</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon purple"><i class="fas fa-tasks"></i></div>
+                            <div class="stat-info">
+                                <h3 id="stat-tasks">0</h3>
+                                <p>مهام معلقة</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon cyan"><i class="fas fa-store"></i></div>
+                            <div class="stat-info">
+                                <h3 id="stat-products">0</h3>
+                                <p>منتجات</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-clock"></i> الطلبات الأخيرة</h2>
+                                <a href="#" class="view-all" data-page="orders">عرض الكل</a>
+                            </div>
+                            <div class="card-body">
+                                <div id="recentOrders"></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-tasks"></i> المهام العاجلة</h2>
+                                <a href="#" class="view-all" data-page="tasks">عرض الكل</a>
+                            </div>
+                            <div class="card-body">
+                                <div id="urgentTasks"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Orders Page -->
+                <section class="page" id="page-orders">
+                    <div class="page-header">
+                        <h1><i class="fas fa-shopping-cart"></i> إدارة الطلبات</h1>
+                        <button class="btn btn-primary" onclick="showOrderModal()">
+                            <i class="fas fa-plus"></i> طلب جديد
+                        </button>
+                    </div>
+                    <div class="filters-bar">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="ordersSearch" placeholder="بحث..." oninput="filterOrders()">
+                        </div>
+                        <div class="filter-group">
+                            <select id="orderStatusFilter" onchange="filterOrders()">
+                                <option value="">كل الحالات</option>
+                                <option value="pending">قيد التنفيذ</option>
+                                <option value="ready">جاهز</option>
+                                <option value="delivered">مُسلّم</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>رقم</th>
+                                    <th>العميل</th>
+                                    <th>الخدمات</th>
+                                    <th>التكلفة</th>
+                                    <th>السعر</th>
+                                    <th>الربح</th>
+                                    <th>الحالة</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Products Page -->
+                <section class="page" id="page-products">
+                    <div id="productsMainView">
+                        <div class="page-header">
+                            <h1><i class="fas fa-store"></i> البضاعة</h1>
+                            <div class="header-buttons">
+                                <button class="btn btn-secondary" onclick="showCategoryModal()">
+                                    <i class="fas fa-folder-plus"></i> قسم جديد
+                                </button>
+                                <button class="btn btn-primary" onclick="showProductModal()">
+                                    <i class="fas fa-plus"></i> منتج جديد
+                                </button>
+                            </div>
+                        </div>
+                        <h2 style="margin-bottom: 1rem; color: var(--gray-700);"><i class="fas fa-folder"></i> الأقسام</h2>
+                        <div class="categories-grid" id="categoriesGrid"></div>
+                    </div>
+                    <div id="categoryProductsView" style="display: none;">
+                        <div class="back-btn" onclick="backToCategories()">
+                            <i class="fas fa-arrow-right"></i>
+                            <span>العودة للأقسام</span>
+                        </div>
+                        <div class="page-header">
+                            <h1 id="categoryTitle"><i class="fas fa-folder-open"></i> <span></span></h1>
+                            <button class="btn btn-primary" onclick="showProductModal()">
+                                <i class="fas fa-plus"></i> منتج جديد
+                            </button>
+                        </div>
+                        <div class="products-grid" id="categoryProducts"></div>
+                    </div>
+                </section>
+                
+                <!-- Cart Floating Button -->
+                <button class="cart-fab" id="cartFab" onclick="toggleCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="badge" id="cartBadge">0</span>
+                </button>
+                
+                <!-- Cart Overlay -->
+                <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+                
+                <!-- Cart Sidebar -->
+                <div class="cart-sidebar" id="cartSidebar">
+                    <div class="cart-header">
+                        <h3><i class="fas fa-shopping-cart"></i> سلة المشتريات</h3>
+                        <button class="close-btn" onclick="toggleCart()" style="background: none; border: none; color: white; font-size: 1.5rem;">×</button>
+                    </div>
+                    <div class="cart-body" id="cartItems">
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-basket"></i>
+                            <p>السلة فارغة</p>
+                        </div>
+                    </div>
+                    <div class="cart-footer">
+                        <div class="cart-total">
+                            <span>الإجمالي:</span>
+                            <span id="cartTotal">0 د.ج</span>
+                        </div>
+                        <div class="cart-actions">
+                            <button class="btn btn-danger" onclick="clearCart()">
+                                <i class="fas fa-trash"></i> إلغاء
+                            </button>
+                            <button class="btn btn-primary" onclick="checkoutCart()">
+                                <i class="fas fa-check"></i> إتمام العملية
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Page -->
+                <section class="page" id="page-inventory">
+                    <div class="page-header">
+                        <h1><i class="fas fa-boxes"></i> إدارة المخزون</h1>
+                        <button class="btn btn-primary" onclick="showMaterialModal()">
+                            <i class="fas fa-plus"></i> إضافة مادة
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>المادة</th>
+                                    <th>الوحدة</th>
+                                    <th>الكمية</th>
+                                    <th>سعر الشراء</th>
+                                    <th>سعر البيع</th>
+                                    <th>الحالة</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Suppliers Page -->
+                <section class="page" id="page-suppliers">
+                    <div class="page-header">
+                        <h1><i class="fas fa-truck"></i> إدارة الموردين</h1>
+                        <button class="btn btn-primary" onclick="showSupplierModal()">
+                            <i class="fas fa-plus"></i> إضافة مورد
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>المورد</th>
+                                    <th>الهاتف</th>
+                                    <th>العنوان</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="suppliersTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Clients Page -->
+                <section class="page" id="page-clients">
+                    <div class="page-header">
+                        <h1><i class="fas fa-users"></i> إدارة العملاء</h1>
+                        <button class="btn btn-primary" onclick="showClientModal()">
+                            <i class="fas fa-plus"></i> إضافة عميل
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>العميل</th>
+                                    <th>الهاتف</th>
+                                    <th>العنوان</th>
+                                    <th>الطلبات</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientsTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tasks Page -->
+                <section class="page" id="page-tasks">
+                    <div class="page-header">
+                        <h1><i class="fas fa-tasks"></i> إدارة المهام</h1>
+                        <button class="btn btn-primary" onclick="showTaskModal()">
+                            <i class="fas fa-plus"></i> مهمة جديدة
+                        </button>
+                    </div>
+                    <div class="filters-bar">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="tasksSearch" placeholder="بحث..." oninput="filterTasks()">
+                        </div>
+                        <div class="filter-group">
+                            <select id="taskPriorityFilter" onchange="filterTasks()">
+                                <option value="">كل الأولويات</option>
+                                <option value="high">عالية</option>
+                                <option value="medium">متوسطة</option>
+                                <option value="low">منخفضة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="tasks-board" id="tasksBoard">
+                        <div class="task-column" data-status="pending">
+                            <div class="task-column-header">
+                                <h3><i class="fas fa-clock" style="color: var(--warning);"></i> قيد الانتظار</h3>
+                                <span class="count" id="pendingCount">0</span>
+                            </div>
+                            <div class="task-list" id="pendingTasks"></div>
+                        </div>
+                        <div class="task-column" data-status="in_progress">
+                            <div class="task-column-header">
+                                <h3><i class="fas fa-spinner" style="color: var(--info);"></i> قيد التنفيذ</h3>
+                                <span class="count" id="inProgressCount">0</span>
+                            </div>
+                            <div class="task-list" id="inProgressTasks"></div>
+                        </div>
+                        <div class="task-column" data-status="completed">
+                            <div class="task-column-header">
+                                <h3><i class="fas fa-check-circle" style="color: var(--success);"></i> مكتمل</h3>
+                                <span class="count" id="completedCount">0</span>
+                            </div>
+                            <div class="task-list" id="completedTasks"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Notes Page -->
+                <section class="page" id="page-notes">
+                    <div class="page-header">
+                        <h1><i class="fas fa-sticky-note"></i> الملاحظات</h1>
+                        <div class="header-buttons">
+                            <button class="btn btn-secondary" onclick="showNoteTagModal()">
+                                <i class="fas fa-tags"></i> إدارة التصنيفات
+                            </button>
+                            <button class="btn btn-primary" onclick="showNoteModal()">
+                                <i class="fas fa-plus"></i> ملاحظة جديدة
+                            </button>
+                        </div>
+                    </div>
+                    <div class="filters-bar">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="notesSearch" placeholder="بحث..." oninput="filterNotes()">
+                        </div>
+                        <div class="filter-group">
+                            <select id="noteTagFilter" onchange="filterNotes()">
+                                <option value="">كل التصنيفات</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="notes-grid" id="notesGrid"></div>
+                </section>
+
+                <!-- Calendar Page -->
+                <section class="page" id="page-calendar">
+                    <div class="page-header">
+                        <h1><i class="fas fa-calendar-alt"></i> التقويم</h1>
+                        <button class="btn btn-primary" onclick="goToToday()">
+                            <i class="fas fa-calendar-day"></i> اليوم
+                        </button>
+                    </div>
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <div class="calendar-nav">
+                                <button onclick="changeMonth(-1)"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <h3 id="calendarMonth"></h3>
+                            <div class="calendar-nav">
+                                <button onclick="changeMonth(1)"><i class="fas fa-chevron-left"></i></button>
+                            </div>
+                        </div>
+                        <div class="calendar-weekdays">
+                            <span>السبت</span>
+                            <span>الأحد</span>
+                            <span>الاثنين</span>
+                            <span>الثلاثاء</span>
+                            <span>الأربعاء</span>
+                            <span>الخميس</span>
+                            <span>الجمعة</span>
+                        </div>
+                        <div class="calendar-days" id="calendarDays"></div>
+                    </div>
+                </section>
+
+                <!-- Reports Page -->
+                <section class="page" id="page-reports">
+                    <div class="page-header">
+                        <h1><i class="fas fa-chart-bar"></i> التقارير والإحصائيات</h1>
+                        <button class="btn btn-secondary" onclick="exportReportPDF()">
+                            <i class="fas fa-file-pdf"></i> تصدير PDF
+                        </button>
+                    </div>
+                    <div class="filters-bar">
+                        <div class="filter-group">
+                            <label>الفترة:</label>
+                            <select id="reportPeriod" onchange="loadReports()">
+                                <option value="today">اليوم</option>
+                                <option value="week">هذا الأسبوع</option>
+                                <option value="month" selected>هذا الشهر</option>
+                                <option value="year">هذا العام</option>
+                                <option value="custom">فترة مخصصة</option>
+                                <option value="all">الكل</option>
+                            </select>
+                        </div>
+                        <div class="filter-group" id="customDateRange" style="display: none;">
+                            <input type="date" id="reportStartDate" onchange="loadReports()">
+                            <span>إلى</span>
+                            <input type="date" id="reportEndDate" onchange="loadReports()">
+                        </div>
+                    </div>
+                    
+                    <!-- Summary Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fas fa-arrow-up"></i></div>
+                            <div class="stat-info">
+                                <h3 id="totalRevenue">0 د.ج</h3>
+                                <p>إجمالي الإيرادات</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red"><i class="fas fa-arrow-down"></i></div>
+                            <div class="stat-info">
+                                <h3 id="totalExpenses">0 د.ج</h3>
+                                <p>إجمالي التكاليف</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fas fa-balance-scale"></i></div>
+                            <div class="stat-info">
+                                <h3 id="netProfit">0 د.ج</h3>
+                                <p>صافي الربح</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon purple"><i class="fas fa-receipt"></i></div>
+                            <div class="stat-info">
+                                <h3 id="totalOrders">0</h3>
+                                <p>عدد الطلبات</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange"><i class="fas fa-percentage"></i></div>
+                            <div class="stat-info">
+                                <h3 id="avgProfitMargin">0%</h3>
+                                <p>متوسط هامش الربح</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon cyan"><i class="fas fa-calculator"></i></div>
+                            <div class="stat-info">
+                                <h3 id="avgOrderValue">0 د.ج</h3>
+                                <p>متوسط قيمة الطلب</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Section -->
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3><i class="fas fa-chart-line"></i> الإيرادات والأرباح</h3>
+                            <div class="chart-container">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3><i class="fas fa-chart-pie"></i> توزيع الخدمات</h3>
+                            <div class="chart-container">
+                                <canvas id="servicesChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3><i class="fas fa-chart-bar"></i> أفضل العملاء</h3>
+                            <div class="chart-container">
+                                <canvas id="clientsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3><i class="fas fa-chart-area"></i> حالة الطلبات</h3>
+                            <div class="chart-container">
+                                <canvas id="ordersStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Stats -->
+                    <div class="report-details-grid">
+                        <div class="detail-card">
+                            <h4>أعلى طلب قيمة</h4>
+                            <div class="value positive" id="highestOrder">0 د.ج</div>
+                        </div>
+                        <div class="detail-card">
+                            <h4>أدنى طلب قيمة</h4>
+                            <div class="value" id="lowestOrder">0 د.ج</div>
+                        </div>
+                        <div class="detail-card">
+                            <h4>العملاء الجدد</h4>
+                            <div class="value" id="newClients">0</div>
+                        </div>
+                        <div class="detail-card">
+                            <h4>الطلبات المعلقة</h4>
+                            <div class="value negative" id="pendingOrders">0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Orders Table -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h2><i class="fas fa-list"></i> تفاصيل الطلبات المُسلّمة</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>رقم</th>
+                                            <th>العميل</th>
+                                            <th>الخدمات</th>
+                                            <th>التاريخ</th>
+                                            <th>التكلفة</th>
+                                            <th>السعر</th>
+                                            <th>الربح</th>
+                                            <th>نسبة الربح</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reportOrdersBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings Page -->
+                <section class="page" id="page-settings">
+                    <div class="page-header">
+                        <h1><i class="fas fa-cog"></i> الإعدادات</h1>
+                    </div>
+                    
+                    <div class="settings-tabs">
+                        <button class="settings-tab active" onclick="switchSettingsTab('general')">
+                            <i class="fas fa-building"></i> عام
+                        </button>
+                        <button class="settings-tab" onclick="switchSettingsTab('services')">
+                            <i class="fas fa-concierge-bell"></i> الخدمات
+                        </button>
+                        <button class="settings-tab" onclick="switchSettingsTab('units')">
+                            <i class="fas fa-ruler"></i> الوحدات
+                        </button>
+                        <button class="settings-tab" onclick="switchSettingsTab('backup')">
+                            <i class="fas fa-database"></i> النسخ الاحتياطي
+                        </button>
+                    </div>
+                    
+                    <!-- General Settings -->
+                    <div class="settings-panel active" id="settings-general">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-building"></i> معلومات المطبعة</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group" style="text-align: center;">
+                                    <label>شعار المطبعة</label>
+                                    <div class="avatar-upload" onclick="document.getElementById('shopLogoInput').click()">
+                                        <img src="" alt="" id="shopLogoPreview" style="display: none;">
+                                        <i class="fas fa-camera" id="logoPlaceholder"></i>
+                                    </div>
+                                    <input type="file" id="shopLogoInput" accept="image/*" onchange="handleLogoUpload(event)" style="display: none;">
+                                    <button class="btn btn-sm btn-secondary" onclick="removeLogo()" style="margin-top: 0.5rem;">
+                                        <i class="fas fa-trash"></i> إزالة
+                                    </button>
+                                </div>
+                                <div class="form-group">
+                                    <label>اسم المطبعة</label>
+                                    <input type="text" id="shopName" placeholder="اسم المطبعة">
+                                </div>
+                                <div class="form-group">
+                                    <label>العنوان</label>
+                                    <input type="text" id="shopAddress" placeholder="العنوان">
+                                </div>
+                                <div class="form-group">
+                                    <label>الهاتف</label>
+                                    <input type="text" id="shopPhone" placeholder="رقم الهاتف">
+                                </div>
+                                <div class="form-group">
+                                    <label>البريد الإلكتروني</label>
+                                    <input type="email" id="shopEmail" placeholder="البريد الإلكتروني">
+                                </div>
+                                <button class="btn btn-primary" onclick="saveSettings()">
+                                    <i class="fas fa-save"></i> حفظ الإعدادات
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Services Settings -->
+                    <div class="settings-panel" id="settings-services">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-concierge-bell"></i> إدارة الخدمات</h2>
+                            </div>
+                            <div class="card-body">
+                                <p style="color: var(--gray-500); margin-bottom: 1rem;">أضف الخدمات الرئيسية مع خدماتها الفرعية وأسعارها</p>
+                                <div id="servicesWithSubsList"></div>
+                                <div class="add-item-row" style="margin-top: 1rem;">
+                                    <input type="text" id="newServiceName" placeholder="اسم الخدمة الجديدة">
+                                    <button class="btn btn-primary" onclick="addServiceWithSubs()">
+                                        <i class="fas fa-plus"></i> إضافة خدمة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Units Settings -->
+                    <div class="settings-panel" id="settings-units">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-ruler"></i> إدارة وحدات القياس</h2>
+                            </div>
+                            <div class="card-body">
+                                <p style="color: var(--gray-500); margin-bottom: 1rem;">أضف وحدات قياس مخصصة</p>
+                                <div class="items-list" id="unitsList"></div>
+                                <div class="add-item-row">
+                                    <input type="text" id="newUnitName" placeholder="اسم الوحدة الجديدة">
+                                    <button class="btn btn-primary" onclick="addUnit()">
+                                        <i class="fas fa-plus"></i> إضافة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Backup Settings -->
+                    <div class="settings-panel" id="settings-backup">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2><i class="fas fa-database"></i> النسخ الاحتياطي والاستعادة</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>تصدير البيانات</label>
+                                    <p style="color: var(--gray-500); font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                        قم بتصدير جميع بياناتك كملف JSON
+                                    </p>
+                                    <button class="btn btn-primary" onclick="exportBackup()">
+                                        <i class="fas fa-download"></i> تصدير النسخة الاحتياطية
+                                    </button>
+                                </div>
+                                <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--gray-200);">
+                                <div class="form-group">
+                                    <label>استيراد البيانات</label>
+                                    <p style="color: var(--gray-500); font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                        استعادة البيانات من نسخة احتياطية سابقة
+                                    </p>
+                                    <input type="file" id="importFile" accept=".json" onchange="importBackup(event)" style="display: none;">
+                                    <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">
+                                        <i class="fas fa-upload"></i> استيراد من ملف
+                                    </button>
+                                </div>
+                                <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--gray-200);">
+                                <div class="form-group">
+                                    <label style="color: var(--danger);">حذف جميع البيانات</label>
+                                    <p style="color: var(--gray-500); font-size: 0.875rem; margin-bottom: 0.5rem;">
+                                        تحذير: سيتم حذف جميع البيانات بشكل نهائي
+                                    </p>
+                                    <button class="btn btn-danger" onclick="clearAllData()">
+                                        <i class="fas fa-trash"></i> حذف كل البيانات
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Order Modal -->
+    <div class="modal" id="orderModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2 id="orderModalTitle">طلب جديد</h2>
+                <button class="close-btn" onclick="closeModal('orderModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="orderForm">
+                    <input type="hidden" id="orderId">
+                    <div class="form-section">
+                        <h3><i class="fas fa-user"></i> معلومات الطلب</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>العميل (اختياري)</label>
+                                <select id="orderClient">
+                                    <option value="">بدون عميل</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>اسم مؤقت</label>
+                                <input type="text" id="orderTempName" placeholder="اسم الزبون...">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>الحالة</label>
+                                <select id="orderStatus">
+                                    <option value="pending">قيد التنفيذ</option>
+                                    <option value="ready">جاهز</option>
+                                    <option value="delivered">مُسلّم</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>تاريخ الطلب</label>
+                                <input type="date" id="orderDate">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>تاريخ التسليم</label>
+                            <input type="date" id="orderDeliveryDate">
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h3><i class="fas fa-list"></i> الخدمات والمواد</h3>
+                        <div id="orderItemsContainer"></div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="addOrderItem()">
+                            <i class="fas fa-plus"></i> إضافة خدمة
+                        </button>
+                    </div>
+                    <div class="form-section additional-costs">
+                        <h4><i class="fas fa-plus-circle"></i> تكاليف إضافية</h4>
+                        <div class="cost-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includeDelivery" onchange="updateOrderTotals()">
+                                <span>التوصيل</span>
+                            </label>
+                            <input type="number" id="deliveryCost" placeholder="0" min="0" step="0.01" onchange="updateOrderTotals()">
+                        </div>
+                        <div class="cost-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includeOtherCost" onchange="updateOrderTotals()">
+                                <span>أخرى</span>
+                            </label>
+                            <input type="number" id="otherCost" placeholder="0" min="0" step="0.01" onchange="updateOrderTotals()">
+                        </div>
+                        <div class="form-group" style="margin-top: 0.5rem;">
+                            <input type="text" id="otherCostDescription" placeholder="وصف التكاليف الأخرى">
+                        </div>
+                    </div>
+                    <div class="form-section order-summary">
+                        <h3><i class="fas fa-calculator"></i> الملخص</h3>
+                        <div class="summary-row">
+                            <span>الخدمات:</span>
+                            <span id="orderServicesCost">0 د.ج</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>تكلفة المواد:</span>
+                            <span id="orderMaterialsCost">0 د.ج</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>سعر المواد:</span>
+                            <span id="orderMaterialsPrice">0 د.ج</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>إضافي:</span>
+                            <span id="orderAdditionalCost">0 د.ج</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>الإجمالي:</span>
+                            <span id="orderTotalPrice">0 د.ج</span>
+                        </div>
+                        <div class="summary-row" style="color: #10b981;">
+                            <span>الربح:</span>
+                            <span id="orderExpectedProfit">0 د.ج</span>
+                        </div>
+                    </div>
+                    <div class="print-options">
+                        <h4><i class="fas fa-file-invoice"></i> خيارات الفاتورة</h4>
+                        <div class="print-option">
+                            <input type="checkbox" id="showServicePrice" checked>
+                            <label for="showServicePrice">سعر الخدمة</label>
+                        </div>
+                        <div class="print-option">
+                            <input type="checkbox" id="showMaterialPrice" checked>
+                            <label for="showMaterialPrice">سعر المواد</label>
+                        </div>
+                        <div class="print-option">
+                            <input type="checkbox" id="showMaterialCost">
+                            <label for="showMaterialCost">تكلفة المواد</label>
+                        </div>
+                        <div class="print-option">
+                            <input type="checkbox" id="showDeliveryCost" checked>
+                            <label for="showDeliveryCost">التوصيل</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="orderNotes" rows="2" placeholder="ملاحظات..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('orderModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveOrder()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Material Modal -->
+    <div class="modal" id="materialModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="materialModalTitle">إضافة مادة</h2>
+                <button class="close-btn" onclick="closeModal('materialModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="materialForm">
+                    <input type="hidden" id="materialId">
+                    <div class="form-group">
+                        <label>اسم المادة</label>
+                        <input type="text" id="materialName" required placeholder="اسم المادة">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الوحدة</label>
+                            <select id="materialUnit"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>الكمية</label>
+                            <input type="number" id="materialQuantity" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>سعر الشراء</label>
+                            <input type="number" id="materialPrice" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>سعر البيع</label>
+                            <input type="number" id="materialSellPrice" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>الحد الأدنى</label>
+                        <input type="number" id="materialMinStock" min="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('materialModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveMaterial()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Modal -->
+    <div class="modal" id="clientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="clientModalTitle">عميل جديد</h2>
+                <button class="close-btn" onclick="closeModal('clientModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="clientForm">
+                    <input type="hidden" id="clientId">
+                    <div class="form-group" style="text-align: center;">
+                        <div class="avatar-upload" onclick="document.getElementById('clientAvatarInput').click()">
+                            <img src="" alt="" id="clientAvatarPreview" style="display: none;">
+                            <i class="fas fa-user" id="clientAvatarPlaceholder"></i>
+                        </div>
+                        <input type="file" id="clientAvatarInput" accept="image/*" onchange="handleAvatarUpload(event, 'client')" style="display: none;">
+                    </div>
+                    <div class="form-group">
+                        <label>الاسم</label>
+                        <input type="text" id="clientName" placeholder="اسم العميل">
+                    </div>
+                    <div class="form-group">
+                        <label>الهاتف</label>
+                        <input type="tel" id="clientPhone" placeholder="رقم الهاتف">
+                    </div>
+                    <div class="form-group">
+                        <label>العنوان</label>
+                        <input type="text" id="clientAddress" placeholder="العنوان">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('clientModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveClient()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supplier Modal -->
+    <div class="modal" id="supplierModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="supplierModalTitle">مورد جديد</h2>
+                <button class="close-btn" onclick="closeModal('supplierModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="supplierForm">
+                    <input type="hidden" id="supplierId">
+                    <div class="form-group" style="text-align: center;">
+                        <div class="avatar-upload" onclick="document.getElementById('supplierAvatarInput').click()">
+                            <img src="" alt="" id="supplierAvatarPreview" style="display: none;">
+                            <i class="fas fa-truck" id="supplierAvatarPlaceholder"></i>
+                        </div>
+                        <input type="file" id="supplierAvatarInput" accept="image/*" onchange="handleAvatarUpload(event, 'supplier')" style="display: none;">
+                    </div>
+                    <div class="form-group">
+                        <label>اسم المورد</label>
+                        <input type="text" id="supplierName" placeholder="اسم المورد">
+                    </div>
+                    <div class="form-group">
+                        <label>الهاتف</label>
+                        <input type="tel" id="supplierPhone" placeholder="رقم الهاتف">
+                    </div>
+                    <div class="form-group">
+                        <label>العنوان</label>
+                        <input type="text" id="supplierAddress" placeholder="العنوان">
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="supplierNotes" rows="2" placeholder="ملاحظات..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('supplierModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveSupplier()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="categoryModalTitle">قسم جديد</h2>
+                <button class="close-btn" onclick="closeModal('categoryModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryId">
+                    <div class="form-group">
+                        <label>صورة القسم</label>
+                        <div class="image-upload" onclick="document.getElementById('categoryImageInput').click()">
+                            <img src="" alt="" id="categoryImagePreview" class="image-preview" style="display: none;">
+                            <i class="fas fa-image" id="categoryImagePlaceholder"></i>
+                            <p>انقر لاختيار صورة</p>
+                        </div>
+                        <input type="file" id="categoryImageInput" accept="image/*" onchange="handleImageUpload(event, 'category')" style="display: none;">
+                    </div>
+                    <div class="form-group">
+                        <label>اسم القسم</label>
+                        <input type="text" id="categoryName" placeholder="اسم القسم">
+                    </div>
+                    <div class="form-group">
+                        <label>الوصف</label>
+                        <textarea id="categoryDescription" rows="2" placeholder="وصف القسم..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('categoryModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveCategory()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="productModalTitle">منتج جديد</h2>
+                <button class="close-btn" onclick="closeModal('productModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <input type="hidden" id="productId">
+                    <div class="form-group">
+                        <label>صورة المنتج</label>
+                        <div class="image-upload" onclick="document.getElementById('productImageInput').click()">
+                            <img src="" alt="" id="productImagePreview" class="image-preview" style="display: none;">
+                            <i class="fas fa-image" id="productImagePlaceholder"></i>
+                            <p>انقر لاختيار صورة</p>
+                        </div>
+                        <input type="file" id="productImageInput" accept="image/*" onchange="handleImageUpload(event, 'product')" style="display: none;">
+                    </div>
+                    <div class="form-group">
+                        <label>اسم المنتج</label>
+                        <input type="text" id="productName" placeholder="اسم المنتج">
+                    </div>
+                    <div class="form-group">
+                        <label>القسم</label>
+                        <select id="productCategory">
+                            <option value="">اختر القسم</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>السعر الافتراضي</label>
+                            <input type="number" id="productPrice" min="0" step="0.01" placeholder="السعر">
+                        </div>
+                        <div class="form-group">
+                            <label>التكلفة</label>
+                            <input type="number" id="productCost" min="0" step="0.01" placeholder="التكلفة">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>الوصف</label>
+                        <textarea id="productDescription" rows="2" placeholder="وصف المنتج..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>وحدات المنتج (اختياري)</label>
+                        <p style="font-size: 0.8125rem; color: var(--gray-500); margin-bottom: 0.5rem;">أضف وحدات مختلفة بأسعار مختلفة</p>
+                        <div class="items-list" id="productUnitsList"></div>
+                        <div class="add-item-row">
+                            <input type="text" id="newProductUnitName" placeholder="اسم الوحدة (مثل: صغير، وسط، كبير)">
+                            <input type="number" id="newProductUnitPrice" placeholder="السعر" min="0" step="0.01" style="width: 100px;">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addProductUnit()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('productModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveProduct()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Product View Modal (for cart) -->
+    <div class="modal product-view-modal" id="productViewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="productViewTitle">عرض المنتج</h2>
+                <button class="close-btn" onclick="closeModal('productViewModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <img src="" alt="" id="productViewImage" class="product-view-img">
+                <div class="product-view-info">
+                    <h2 id="productViewName"></h2>
+                    <p id="productViewDescription" style="color: var(--gray-500); margin-bottom: 1rem;"></p>
+                    <div class="product-view-price" id="productViewPrice">0 د.ج</div>
+                </div>
+                <div class="form-group" id="productUnitsSection" style="display: none;">
+                    <label>اختر الوحدة:</label>
+                    <div class="product-units-list" id="productViewUnits"></div>
+                </div>
+                <div class="form-group">
+                    <label>الكمية:</label>
+                    <div class="cart-item-qty" style="justify-content: flex-start;">
+                        <button type="button" onclick="decreaseViewQty()">-</button>
+                        <span id="productViewQty">1</span>
+                        <button type="button" onclick="increaseViewQty()">+</button>
+                    </div>
+                </div>
+                <input type="hidden" id="productViewId">
+                <input type="hidden" id="selectedUnitIndex" value="-1">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('productViewModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="addToCartFromView()">
+                    <i class="fas fa-cart-plus"></i> أضف إلى السلة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="taskModalTitle">مهمة جديدة</h2>
+                <button class="close-btn" onclick="closeModal('taskModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="taskForm">
+                    <input type="hidden" id="taskId">
+                    <div class="form-group">
+                        <label>عنوان المهمة</label>
+                        <input type="text" id="taskTitle" placeholder="عنوان المهمة">
+                    </div>
+                    <div class="form-group">
+                        <label>الوصف</label>
+                        <textarea id="taskDescription" rows="3" placeholder="وصف المهمة..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الأولوية</label>
+                            <select id="taskPriority">
+                                <option value="low">منخفضة</option>
+                                <option value="medium">متوسطة</option>
+                                <option value="high">عالية</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الحالة</label>
+                            <select id="taskStatus">
+                                <option value="pending">قيد الانتظار</option>
+                                <option value="in_progress">قيد التنفيذ</option>
+                                <option value="completed">مكتمل</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>تاريخ الاستحقاق</label>
+                        <input type="date" id="taskDueDate">
+                    </div>
+                    <div class="form-group">
+                        <label>ربط بطلب (اختياري)</label>
+                        <select id="taskOrderId">
+                            <option value="">بدون ربط</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('taskModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveTask()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div class="modal" id="noteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="noteModalTitle">ملاحظة جديدة</h2>
+                <button class="close-btn" onclick="closeModal('noteModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="noteForm">
+                    <input type="hidden" id="noteId">
+                    <div class="form-group">
+                        <label>العنوان</label>
+                        <input type="text" id="noteTitle" placeholder="عنوان الملاحظة">
+                    </div>
+                    <div class="form-group">
+                        <label>المحتوى</label>
+                        <textarea id="noteContent" rows="5" placeholder="محتوى الملاحظة..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>التصنيف</label>
+                        <select id="noteTag">
+                            <option value="">بدون تصنيف</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('noteModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveNote()">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Tag Modal -->
+    <div class="modal" id="noteTagModal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h2>إدارة التصنيفات</h2>
+                <button class="close-btn" onclick="closeModal('noteTagModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="items-list" id="noteTagsList"></div>
+                <div class="add-item-row" style="margin-top: 1rem;">
+                    <input type="text" id="newTagName" placeholder="تصنيف جديد">
+                    <button class="btn btn-primary" onclick="addNoteTag()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Modal -->
+    <div class="modal" id="invoiceModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>الفاتورة</h2>
+                <button class="close-btn" onclick="closeModal('invoiceModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="invoiceContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('invoiceModal')">إغلاق</button>
+                <button class="btn btn-primary" onclick="printInvoice()">
+                    <i class="fas fa-print"></i> طباعة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day Details Modal -->
+    <div class="modal" id="dayModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="dayModalTitle">تفاصيل اليوم</h2>
+                <button class="close-btn" onclick="closeModal('dayModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="dayModalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
